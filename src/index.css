@@ -1,0 +1,19 @@
+@import "tailwindcss";
+*{
+  margin: 0 ;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100vw;
+  min-height: 100vh;
+}
+
+
+
+
+
+
+
+
+
