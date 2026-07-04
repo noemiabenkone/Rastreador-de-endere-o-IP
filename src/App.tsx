@@ -1,11 +1,30 @@
 import { ChevronRight } from "lucide-react";
 import MapComponent from "./components/MapComponent";
+import { useState } from "react";
+
 
 function App() {
+  const [searchIP, setSearchIP] = useState("")
+  const [ipData, setIPData] = useState<any>(null)
+  
+  const handleSearch = () => {
+    setSearchIP(searchIP.trim())
+    fetchIPData(searchIP.trim())
+  } 
+  
+  async function fetchIPData( ip: string) {
+    const response = await fetch(`https://geo.ipify.org/api/v2/country,city?apiKey=at_rQ6jEdCITnOlUypv4YgHat1hnDt1v&ipAddress=${ip}`)
+    const data = await response.json()
+    setIPData(data)
+  }
 
  return (
-  <main className="w-full min-h-screen bg-gray-100">
-    
+  <main 
+    className="
+      w-full 
+      min-h-screen 
+      bg-gray-100"
+    >
     <section 
       className="
         bg-[url('/imagem-cabecalho.png')]
@@ -28,18 +47,65 @@ function App() {
         z-10
       "
     >
-      <h1 className="text-3xl font-bold text-white">
+      <h1 
+        className="
+          text-3xl 
+          font-bold 
+          text-white"
+        >
         Rastreador de Endereço IP
       </h1>
 
-      <div className="relative w-full max-w-lg flex items-center mb-4">
+      <div 
+        className="
+          relative 
+          w-full 
+          max-w-lg 
+          flex 
+          items-center 
+          mb-4"
+        >
         <input 
           type="text" 
+          value={searchIP}
+          onChange={(e) => setSearchIP(e.target.value)}
           placeholder="Digite o endereço IP" 
-          className="w-full max-w-lg h-14 rounded-xl pl-5 pr-16 border border-white bg-white text-gray-800 text-base focus:outline-none"
+          className="
+            w-full 
+            max-w-lg 
+            h-14 
+            rounded-xl 
+            pl-5 
+            pr-16 
+            border 
+            border-white 
+            bg-white 
+            text-gray-800 
+            text-base 
+            focus:outline-none"
         />
-        <button className="flex items-center justify-center absolute right-0 bottom-0 top-0 px-6 rounded-r-xl bg-gray-900 hover:bg-gray-700 transition-colors focus:border-gray-400">
-          <ChevronRight className="text-white w-5 h-5" />
+        <button 
+          onClick={handleSearch}
+          className="
+            flex 
+            items-center 
+            justify-center 
+            absolute 
+            right-0 
+            bottom-0 
+            top-0 
+            px-6 
+            rounded-r-xl 
+            bg-gray-900 
+            hover:bg-gray-700 
+            transition-colors 
+            focus:border-gray-400"
+        >
+          <ChevronRight 
+            className="
+              text-white 
+              w-5 h-5" 
+          />
         </button>
       </div>
 
@@ -49,7 +115,9 @@ function App() {
             
             <div className="flex flex-col items-center md:items-start md:border-r md:border-gray-300 md:pr-8">
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">endereço IP</span>
-              <span className="text-xl md:text-2xl font-bold text-gray-800">192.212.174.101</span>
+              <span className="text-xl md:text-2xl font-bold text-gray-800">
+                {ipData?.ip || "Buscando IP..."}
+              </span>
             </div>
 
             <div className="flex flex-col items-center md:items-start md:border-r md:border-gray-300 md:px-8">
