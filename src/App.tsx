@@ -1,33 +1,64 @@
-import { ChevronRight } from "lucide-react";
+import { Bot } from 'lucide-react'
 import MapComponent from "./components/MapComponent";
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
+// Default mock data
+const defaultData = {
+  ip: "192.212.174.101",
+  location: {
+    city: "Brooklyn",
+    region: "NY",
+    postalCode: "10001",
+    timezone: "-05:00",
+    lat: 40.7128,
+    lng: -74.0060
+  },
+  isp: "SpaceX Starlink"
+}
 
 function App() {
  const[searchIP, setSearchIP] = useState('')
  const[ipData, setIPData] = useState<any>(null)
 
  const handleSearch = () => {
-  setSearchIP(searchIP.trim())
-  getIPData(searchIP.trim())
+  const trimmedIP = searchIP.trim()
+  setSearchIP(trimmedIP)
+  getIPData(trimmedIP)
 
  }
  async function getIPData(ip: string){
-  const response = await fetch(`https://geo.ipify.org/api/v2/country,city?apiKey=at_rQ6jEdCITnOlUypv4YgHat1hnDt1v&ipAddress=${ip}`)
-  const data = await response.json()
-  setIPData(data)
+  const apiKey = import.meta.env.VITE_IPIFY_API_KEY
+  try {
+    const response = await fetch(`https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}&ipAddress=${ip}`)
+    
+    if (!response.ok) {
+      throw new Error(`Erro na requisição: ${response.status}`)
+    }
+
+    const data = await response.json()
+    setIPData(data)
+  } catch (error) {
+    console.error("Erro ao buscar dados do IPify:", error)
+    setIPData(null) 
+  }
+  
  }
+ useEffect(() => {
+   getIPData('');
+ }, [])
 
  return (
   <main 
     className="
       w-full 
       min-h-screen 
+      flex
+      flex-col
       bg-gray-100"
     >
     <section 
       className="
-        bg-[url('/imagem-cabecalho.png')]
+        bg-[url('/pattern-bg-mobile.png')] md:bg-[url('/pattern-bg-desktop.png')]
         w-full 
         h-[280px] 
         px-4
@@ -53,7 +84,7 @@ function App() {
           font-bold 
           text-white"
         >
-        Rastreador de Endereço IP
+        Rastreador Inteligente de IPs
       </h1>
 
       <div 
@@ -69,12 +100,13 @@ function App() {
           type="text" 
           value={searchIP}
           onChange={(e) => setSearchIP(e.target.value)}
-          placeholder="Digite o endereço IP" 
+          onKeyDown={(e) => { if(e.key === 'Enter') handleSearch() }}
+          placeholder="O que voce quer buscar?" 
           className="
             w-full 
             max-w-lg 
             h-14 
-            rounded-xl 
+            rounded-lg 
             pl-5 
             pr-16 
             border 
@@ -95,18 +127,15 @@ function App() {
             bottom-0 
             top-0 
             px-6 
-            rounded-r-xl 
-            bg-gray-900 
-            hover:bg-gray-700 
+            rounded-lg
+            bg-black 
+            hover:bg-gray-800 
             transition-colors 
-            focus:border-gray-400"
+            cursor-pointer"
         >
-          <ChevronRight 
-            className="
-              text-white 
-              w-5 h-5" 
-          />
+          <Bot className="w-5 h-5 text-white"/>
         </button>
+        
       </div>
 
       <div 
@@ -156,7 +185,7 @@ function App() {
                 uppercase 
                 tracking-widest 
                 mb-2">
-                endereço IP
+                Endereço IP
               </span>
 
               <span 
@@ -165,7 +194,7 @@ function App() {
                   md:text-2xl 
                   font-bold 
                   text-gray-800">
-                {ipData?.ip || "Buscando endereço IP..."}
+                {ipData?.ip || "Loading..."}
               </span>
             </div>
 
@@ -192,14 +221,20 @@ function App() {
 
               <span 
                 className="
-                  text-xl 
-                  md:text-2xl 
-                  font-bold 
-                  text-gray-800 
-                  text-center 
-                  md:text-left">
-                {ipData ? `${ipData.location?.city}, ${ipData.location?.region}` : "Buscando..."} 
-                <br className="hidden md:inline" /> 10001
+                text-xl 
+                md:text-2xl 
+                font-bold 
+                text-gray-800 
+                text-center 
+                md:text-left">
+               {ipData ? (
+               <>
+                 {ipData.location?.city}, {ipData.location?.region}
+                 <br className="hidden md:inline" /> {ipData.location?.postalCode}
+               </>
+               ) : (
+                 "Loading..."
+               )}
               </span>
 
             </div>
@@ -222,7 +257,7 @@ function App() {
                   uppercase 
                   tracking-widest 
                   mb-2">
-                Fuso horário
+                Fuso Horário
               </span>
 
               <span 
@@ -231,7 +266,7 @@ function App() {
                   md:text-2xl 
                   font-bold 
                   text-gray-800">
-                {ipData ? `UTC ${ipData.location?.timezone}` : "Buscando..."}
+                {ipData ? `UTC ${ipData.location?.timezone}` : "Loading..."}
               </span>
 
             </div>
@@ -260,7 +295,7 @@ function App() {
                   md:text-2xl 
                   font-bold 
                   text-gray-800">
-                {ipData?.isp || "Buscando..."}
+                {ipData?.isp || "Loading..."}
               </span>
 
             </div>
@@ -276,11 +311,11 @@ function App() {
         w-full 
         flex-1 
         bg-gray-200 
-        min-h-[400px] 
+        min-h-[calc(100vh-280px)] 
         z-0">
       <MapComponent 
-       lat={ipData?.location?.lat || -23.55052} 
-       lng={ipData?.location?.lng || -46.633308} 
+        lat={ipData?.location?.lat} 
+        lng={ipData?.location?.lng} 
       />
     </section>
    
