@@ -2,15 +2,13 @@ import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useEffect } from "react";
 
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Fix Leaflet marker icons without deleting prototype
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
+const customIcon = new L.Icon({
+  iconUrl: "/icon-location.svg",
+  iconRetinaUrl: "/icon-location.svg",
+  iconSize: [46, 56], 
+  iconAnchor: [23, 56],
+  popupAnchor: [0, -56],  
 });
 
 function ChangeMapCenter({ center }: { center: [number, number] }) {
@@ -22,25 +20,26 @@ function ChangeMapCenter({ center }: { center: [number, number] }) {
 }
 
 interface MapProps {
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
 }
 
 export default function MapComponent({ lat, lng }: MapProps) {
-  const position: [number, number] = [lat, lng];
+  
+  const position: [number, number] = [lat ?? 40.650002, lng ?? -73.949997];
 
   return (
-    <MapContainer 
-      center={position} 
-      zoom={13} 
-      zoomControl={false} 
-      className="w-full h-full min-h-[400px] z-0"
+    <MapContainer
+      center={position}
+      zoom={13}
+      zoomControl={false}
+      className="w-full h-full min-h-[calc(100vh-280px)] z-0"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <Marker position={position} />
+      <Marker position={position} icon={customIcon} />
       <ChangeMapCenter center={position} />
     </MapContainer>
   );
